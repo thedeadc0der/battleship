@@ -1,37 +1,33 @@
 #ifndef BATTLESHIP_SERVER_H
 #define BATTLESHIP_SERVER_H
 
-#include <time.h>
-#include <stddef.h>
-#include <stdbool.h>
+#include "base/net.h"
 
-#define NAME_MAX 64
+// Client management
+void SRV_HandleClient(socket_t *socket);
 
-void SRV_Init();
-void SRV_Finalize();
-
-typedef uint32_t SRV_UserID;
+// User management
+typedef struct SRV_User SRV_User;
 
 typedef enum {
-	SRV_US_Disconnected,
-	SRV_US_Hidden,
-	SRV_US_Connected,
-} SRV_UserStatus;
+	SRV_AddUser_BadName,
+	SRV_AddUser_BadPass,
+	SRV_AddUser_NameTaken,
+	SRV_AddUser_MaxCapacity,
+} SRV_User_Result;
 
-typedef struct {
-	SRV_UserID	id;
-	char 		name[NAME_MAX];
-	char 		pass[NAME_MAX];
-	time_t 		lastLogin;
-} SRV_UserInfo;
+SRV_User *SRV_RegisterUser(const char *name, const char *pass, SRV_User_Result *r);
+SRV_User *SRV_FindUserByName(const char *name);
+SRV_User *SRV_FindUserByNameAndPass(const char *name, const char *pass);
 
-SRV_Error SRV_Register(const char *login, const char *pass, size_t board_size);
-SRV_UserInfo * SRV_Find(const char *login, const char *pass);
+const char *SRV_UserName(const SRV_User*);
+const SRV_User *SRV_UserList();
+const SRV_User *SRV_NextUser(const SRV_User *user);
 
+void SRV_LoadUsers();
+void SRV_SaveUsers();
 
-
-void SRV_RegisterUser(const SRV_UserInfo *info);
-SRV_UserInfo * SRV_FindUserWithCreds(const char *name, const char *pass);
+// Games management
 
 
 #endif
