@@ -1,6 +1,6 @@
 
 # 
-CFLAGS := ${CFLAGS} -I.
+CFLAGS := ${CFLAGS} -I. -std=c99
 
 # List all object files
 SERVER_OBJECTS := server/main.o
