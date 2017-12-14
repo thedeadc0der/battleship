@@ -3,9 +3,9 @@
 CFLAGS := ${CFLAGS} -I. -std=c99
 
 # List all object files
-SERVER_OBJECTS := server/main.o
 CLIENT_OBJECTS := client/main.o
 COMMON_OBJECTS := base/cmdline.o base/socket.o base/net.o
+SERVER_OBJECTS := server/main.o server/users.o server/session.o
 
 OBJECTS := ${COMMON_OBJECTS} ${SERVER_OBJECTS} ${CLIENT_OBJECTS}
 
