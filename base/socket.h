@@ -29,5 +29,7 @@ bool SOCK_Receive(socket_t *s, void *dst, size_t len);
 
 size_t SOCK_SendString(socket_t *s, const char *src);
 size_t SOCK_ReceiveString(socket_t *s, char *dst, size_t dstLen);
+size_t SOCK_SendLine(socket_t *s, const char *src);
+size_t SOCK_ReceiveLine(socket_t *s, char *dst, size_t dstLen);
 
 #endif

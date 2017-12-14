@@ -37,8 +37,10 @@ bool SOCK_Server(socket_t *sock, const char *svc){
 	
 	// Get our addresses
 	struct addrinfo *result = NULL;
-	if( getaddrinfo(NULL, svc, &hints, &result) == -1 )
+	if( getaddrinfo(NULL, svc, &hints, &result) == -1 ){
+		perror("getaddrinfo");
 		return false;
+	}
 	
 	// Now, try everything getaddrinfo returned, until one works.
 	int serverSocket = -1;
@@ -261,17 +263,28 @@ bool SOCK_Receive(socket_t *s, void *dstPtr, size_t len){
 	return true;
 }
 
-size_t SOCK_SendString(socket_t *s, const char *src){
+static size_t SOCK_SendTermString(socket_t *s, const char *src, char term){
 	assert(s != NULL && src != NULL);
-	size_t len = strlen(src) + 1;
+	size_t len = strlen(src);
 	
 	if( !SOCK_Send(s, src, len) )
+		return 0;
+	
+	if( !SOCK_Send(s, &term, sizeof(term)) )
 		return 0;
 	
 	return len;
 }
 
-size_t SOCK_ReceiveString(socket_t *s, char *dst, size_t dstLen){
+size_t SOCK_SendString(socket_t *s, const char *src){
+	return SOCK_SendTermString(s, src, '\0');
+}
+
+size_t SOCK_SendLine(socket_t *s, const char *src){
+	return SOCK_SendTermString(s, src, '\n');
+}
+
+static size_t SOCK_ReceiveTermString(socket_t *s, char *dst, size_t dstLen, char term){
 	assert(s != NULL && dst != NULL);
 	assert(dstLen >= 1);
 	
@@ -284,7 +297,7 @@ size_t SOCK_ReceiveString(socket_t *s, char *dst, size_t dstLen){
 			break;
 		
 		// A null character ends the string.
-		if( c == '\0' )
+		if( c == term )
 			break;
 		
 		// It's just a normal character, add it to the string.
@@ -295,5 +308,13 @@ size_t SOCK_ReceiveString(socket_t *s, char *dst, size_t dstLen){
 	// Terminate the string and return its length.
 	*dst = '\0';
 	return written;
+}
+
+size_t SOCK_ReceiveString(socket_t *s, char *dst, size_t dstLen){
+	return SOCK_ReceiveTermString(s, dst, dstLen, '\0');
+}
+
+size_t SOCK_ReceiveLine(socket_t *s, char *dst, size_t dstLen){
+	return SOCK_ReceiveTermString(s, dst, dstLen, '\n');
 }
 
