@@ -4,7 +4,7 @@
 #include "base/net.h"
 
 // Client management
-void SRV_HandleClient(socket_t *socket);
+void *SRV_HandleClient(socket_t *socket);
 
 // User management
 typedef struct SRV_User SRV_User;
