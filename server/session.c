@@ -20,17 +20,24 @@ static bool SRV_HandleAnonymousPhase(SRV_Session *session){
 		if( !NET_ReceiveRequest(&session->socket, &req) )
 			return false;
 		
-		// Handle the request
+		// During the anonymous phase, only login and create are valid.
+		if( req.code != NET_REQUEST_ACC_LOGIN && req.code != NET_REQUEST_ACC_CREATE ){
+			NET_SendCode(&session->socket, NET_RESPONSE_BAD_PROTOCOL);
+			return false;
+		}
+		
+		// Retrieve the fields, and make sure they're present.
+		const char *name, *pass;
+		name = NET_GetRequestField(&req, "name");
+		pass = NET_GetRequestField(&req, "pass");
+		
+		if( name == NULL || pass == NULL ){
+			NET_SendCode(&session->socket, NET_RESPONSE_BAD_REQUEST);
+			return false;
+		}
+		
 		if( req.code == NET_REQUEST_ACC_LOGIN ){
-			const char *name, *pass;
-			name = NET_GetRequestField(&req, "name");
-			pass = NET_GetRequestField(&req, "pass");
-			
-			// Empty name and/or pass are invalid.
-			if( name == NULL || pass == NULL ){
-				NET_SendCode(&session->socket, NET_RESPONSE_BAD_REQUEST);
-				return false;
-			}
+			printf("SRV: Logging in user: name=(%s) password=(%s)\n", name, pass);
 			
 			// Look for them in the users list.
 			SRV_User *user = SRV_FindUserByNameAndPass(name, pass);
@@ -45,16 +52,44 @@ static bool SRV_HandleAnonymousPhase(SRV_Session *session){
 			if( user == NULL )
 				NET_SendCode(&session->socket, NET_RESPONSE_NOT_FOUND);
 		} else if( req.code == NET_REQUEST_ACC_CREATE ){
-			// Registration request: go
+			printf("SRV: Registering user: name=(%s) password=(%s)\n", name, pass);
 			
-		} else {
-			NET_SendCode(&session->socket, NET_RESPONSE_BAD_PROTOCOL);
-			return false;
+			// Perform the registration.
+			SRV_User_Result result;
+			SRV_User *user = SRV_RegisterUser(name, pass, &result);
+			
+			// If there was an error, report it.
+			if( user == NULL ){
+				NET_ResponseCode res;
+				switch(result){
+					default:
+					case SRV_AddUser_BadName:
+					case SRV_AddUser_BadPass:
+						res = NET_RESPONSE_BAD_REQUEST;
+						break;
+					
+					case SRV_AddUser_NameTaken:
+						res = NET_RESPONSE_NOT_AVAILABLE;
+						break;
+					
+					case SRV_AddUser_MaxCapacity:
+						res = NET_RESPONSE_OUT_OF_BOUNDS;
+						break;
+				}
+				
+				NET_SendCode(&session->socket, res);
+				return false;
+			}
+			
+			// If not, let them become the new user.
+			session->user = user;
+			NET_SendCode(&session->socket, NET_RESPONSE_OK);
+			return true;
 		}
 	}
 }
 
-void SRV_HandleClient(socket_t *socket){
+void * SRV_HandleClient(socket_t *socket){
 	// Initialize the session
 	SRV_Session session;
 	session.socket	= *socket;
@@ -64,8 +99,8 @@ void SRV_HandleClient(socket_t *socket){
 	// the client makes a successful registration or login request.
 	if( !SRV_HandleAnonymousPhase(&session) ){
 		SRV_CloseSession(&session);
-		return;
+		return NULL;
 	}
 	
-	
+	return NULL;
 }
