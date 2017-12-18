@@ -35,13 +35,15 @@ void SRV_Finalize(){
 	SRV_SaveUsers();
 }
 
-static void handle_ctrl_c(int signal){
-	g_serverState.shouldStop = false;
-	SOCK_Close(&g_serverState.socket);
+static void signal_handler(int signal){
+	if( signal == SIGINT ){
+		g_serverState.shouldStop = false;
+		SOCK_Close(&g_serverState.socket);
+	}
 }
 
 int main(int argc, const char **argv){
-	handle_signal(SIGINT, handle_ctrl_c);
+	handle_signal(SIGINT, signal_handler);
 	
 	CMD_Set(argc, argv);
 	SRV_Init();

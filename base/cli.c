@@ -33,8 +33,6 @@ int CLI_Menu(const char *prompt, const CLI_MenuOption *options, size_t n){
 	for(size_t i=0; i < n; ++i)
 		printf(" %d: %s\n", options[i].value, options[i].title);
 	
-	int result = -1;
-	
 	for(;;) {
 		int choice;
 		printf("Votre choix: ");

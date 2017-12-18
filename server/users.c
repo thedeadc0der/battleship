@@ -71,6 +71,7 @@ static SRV_User * UserFind(UserPredicate predicate, void *param){
 	return NULL;
 }
 
+#if 0
 static void UserDelete(SRV_User *user){
 	assert(user != NULL);
 	
@@ -87,6 +88,7 @@ static void UserDelete(SRV_User *user){
 	// De-allocate it
 	free(user);
 }
+#endif
 
 
 // ============================================================================
@@ -231,11 +233,16 @@ void SRV_SaveUsers(){
 		return;
 	}
 	
-	for(SRV_User *curr=g_userList; curr != NULL; curr = curr->next)
+	int userCount = 0;
+	for(SRV_User *curr=g_userList; curr != NULL; curr = curr->next){
 		fprintf(fp, "%s;%s;\n", curr->name, curr->pass);
+		userCount++;
+	}
 	
 	fflush(fp);
 	fclose(fp);
+	
+	printf("SRV: Saved %d users to '%s'\n", userCount, USERS_FILE);
 }
 
 void SRV_LoadUsers(){
@@ -247,8 +254,27 @@ void SRV_LoadUsers(){
 		return;
 	}
 	
+	int userCount = 0;
+	while( !feof(fp) ){
+		char line[4096], login[NAME_MAX], pass[NAME_MAX];
+		
+		if( fgets(line, sizeof(line), fp) == NULL )
+			break;
+		
+		int i=0;
+		for(char *curr=strtok(line, ";"); curr != NULL; ++i, curr = strtok(NULL, ";")){
+			if( i == 0 )
+				strcpy(login, curr);
+			
+			if( i == 1 )
+				strcpy(pass, curr);
+		}
+		
+		if( UserAdd(login, pass) != NULL )
+			userCount++;
+	}
 	
-	
+	printf("SRV: Loaded %d users from '%s'\n", userCount, USERS_FILE);
 	fclose(fp);
 }
 
