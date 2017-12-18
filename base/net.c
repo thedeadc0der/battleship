@@ -88,16 +88,20 @@ bool NET_ReceiveRequest(socket_t *socket, NET_Request *req){
 	char buffer[REQUEST_BUFFER_SIZE];
 	
 	// The first line should contain the code
-	if( SOCK_ReceiveLine(socket, buffer, REQUEST_BUFFER_SIZE) == 0 )
+	if( SOCK_ReceiveLine(socket, buffer, REQUEST_BUFFER_SIZE) == 0 ){
+		fprintf(stderr, "[NET] failed to receive initial line\n");
 		return false;
+	}
 	
 	sscanf(buffer, "%d", &req->code);
 	
 	// Which should be followed by a number of fields
 	while(1){
 		// Receive one line
-		if( SOCK_ReceiveLine(socket, buffer, REQUEST_BUFFER_SIZE) == 0 )
+		if( SOCK_ReceiveLine(socket, buffer, REQUEST_BUFFER_SIZE) == 0 ){
+			fprintf(stderr, "[NET] failed to receive field line\n");
 			return false;
+		}
 		
 		// If it's an END line, we're done.
 		if( strcmp(buffer, "END") == 0 )
@@ -106,8 +110,10 @@ bool NET_ReceiveRequest(socket_t *socket, NET_Request *req){
 		// Split the field into 'name=value'
 		char *separator = strchr(buffer, '=');
 		
-		if( separator == NULL )
+		if( separator == NULL ){
+			fprintf(stderr, "[NET] bad line (no separator): %s\n", buffer);
 			return false;
+		}
 		
 		// Replace the equals sign with a null terminator so we get 2 strings.
 		*separator++ = '\0';
