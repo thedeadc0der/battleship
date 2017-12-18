@@ -71,6 +71,7 @@ static SRV_User * UserFind(UserPredicate predicate, void *param){
 	return NULL;
 }
 
+#if 0
 static void UserDelete(SRV_User *user){
 	assert(user != NULL);
 	
@@ -87,6 +88,7 @@ static void UserDelete(SRV_User *user){
 	// De-allocate it
 	free(user);
 }
+#endif
 
 
 // ============================================================================

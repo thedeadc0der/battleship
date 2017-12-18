@@ -133,13 +133,13 @@ void NET_SendCode(socket_t *link, NET_ResponseCode err){
 }
 
 void NET_DumpRequest(NET_Request *req, FILE *f){
-	printf("+------------------------------------------------------------\n");
-	printf("| Code: %d\n", req->code);
-	printf("| Fields (%zu fields total)\n", req->field_count);
+	fprintf(f, "+------------------------------------------------------------\n");
+	fprintf(f, "| Code: %d\n", req->code);
+	fprintf(f, "| Fields (%zu fields total)\n", req->field_count);
 	
 	for(size_t i=0; i < req->field_count; ++i)
-		printf("|     [%zu] %s = %s\n", i, req->fields[i].name, req->fields[i].value);
+		fprintf(f, "|     [%zu] %s = %s\n", i, req->fields[i].name, req->fields[i].value);
 	
-	printf("+------------------------------------------------------------\n");
+	fprintf(f, "+------------------------------------------------------------\n");
 }
 

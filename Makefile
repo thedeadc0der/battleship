@@ -1,6 +1,6 @@
 
 # 
-CFLAGS := ${CFLAGS} -I. -std=c99
+CFLAGS := ${CFLAGS} -I. -std=c99 -g -Wall -Wextra
 
 # List all object files
 COMMON_OBJECTS := base/cmdline.o base/socket.o base/net.o base/cli.o
