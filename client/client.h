@@ -3,6 +3,8 @@
 
 #include "base/net.h"
 
+#define NAME_MAX 1024
+
 // Client state
 typedef enum {
 	CLT_STATE_ANY			= 0xFF,
@@ -17,14 +19,11 @@ typedef enum {
 typedef struct {
 	CLT_StateCode			state;
 	socket_t				link;
+	char					name[NAME_MAX];
 } CLT_State;
 
 extern CLT_State CLT_CurrentState;
 
-// Console
-void CLT_RegisterCommands();
-void CLT_RunConsole();
-typedef void(*CLT_CommandFunc)(int argc, const char **argv);
-void CLT_AddCommand(const char *name, CLT_CommandFunc cf, unsigned avail);
+bool CLT_HandleAnonymousPhase();
 
 #endif

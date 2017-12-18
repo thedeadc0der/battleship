@@ -151,6 +151,7 @@ void SOCK_Close(socket_t *sock){
 	assert(sock != NULL);
 	assert(sock->fd > 0);
 	
+	shutdown(sock->fd, SHUT_RDWR);
 	close(sock->fd);
 	memset(sock, 0, sizeof(*sock));
 }
@@ -166,7 +167,7 @@ bool SOCK_Accept(const socket_t *server, socket_t *client){
 	int result = accept(server->fd, (struct sockaddr*) &client_addr, &client_addr_len);
 	
 	// Handle failure gracefully.
-	if( !result ){
+	if( result == -1 ){
 		memset(client, 0, sizeof(*client));
 		return false;
 	}

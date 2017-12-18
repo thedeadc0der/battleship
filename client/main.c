@@ -4,6 +4,7 @@
 #include "base/cmdline.h"
 #include "base/socket.h"
 #include "base/net.h"
+#include "base/cli.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -27,11 +28,9 @@ int main(int argc, const char **argv){
 		return EXIT_FAILURE;
 	}
 	
-	CLT_RegisterCommands();
-	
-	// Let the user log in or register
-	while( CLT_CurrentState.state == CLT_STATE_ANONYMOUS )
-		CLT_RunConsole();
+	if( CLT_HandleAnonymousPhase() ){
+		// Do what comes next
+	}
 	
 	SOCK_Close(link);
 	return 0;
