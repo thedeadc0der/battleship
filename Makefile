@@ -1,6 +1,7 @@
 
 # 
-CFLAGS := ${CFLAGS} -I. -std=c99 -g -Wall -Wextra
+CFLAGS := ${CFLAGS} -I. -std=c99 -g -Wall -Wextra -D_GNU_SOURCE
+LDFLAGs = ${LDFLAGS} -lpthread
 
 # List all object files
 COMMON_OBJECTS := base/cmdline.o base/socket.o base/net.o base/cli.o
